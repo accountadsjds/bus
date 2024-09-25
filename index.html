@@ -33,14 +33,14 @@
     </style>
 </head>
 <body>
-    <h1 onclick="toggleArrivalTimes('arrival-times-302-to', '302')">302 from Station to MGS <span id="toggle-302">+</span></h1>
-    <div id="arrival-times-302-to" style="display: none;"></div>
+    <h1 onclick="toggleArrivalTimes('arrival-times-302-to', 'toggle-302')">302 from Station to MGS <span id="toggle-302">-</span></h1>
+    <div id="arrival-times-302-to" style="display: block;"></div>
 
-    <h1 onclick="toggleArrivalTimes('arrival-times-302-home', '302-home')">302 from MGS to Station <span id="toggle-302-home">+</span></h1>
-    <div id="arrival-times-302-home" style="display: none;"></div>
+    <h1 onclick="toggleArrivalTimes('arrival-times-302-home', 'toggle-302-home')">302 from MGS to Station <span id="toggle-302-home">-</span></h1>
+    <div id="arrival-times-302-home" style="display: block;"></div>
 
-    <h1 onclick="toggleArrivalTimes('arrival-times-210', '210')">210 From outside Brent Cross <span id="toggle-210">+</span></h1>
-    <div id="arrival-times-210" style="display: none;"></div>
+    <h1 onclick="toggleArrivalTimes('arrival-times-210', 'toggle-210')">210 From outside Brent Cross <span id="toggle-210">-</span></h1>
+    <div id="arrival-times-210" style="display: block;"></div>
 
     <script>
         function setCookie(name, value, days) {
@@ -60,7 +60,9 @@
             const toggleSpan = document.getElementById(toggleId);
             const isVisible = arrivalTimesDiv.style.display === 'block';
 
+            // Toggle visibility
             arrivalTimesDiv.style.display = isVisible ? 'none' : 'block';
+            // Update the toggle sign
             toggleSpan.textContent = isVisible ? '+' : '-';
 
             // Store the state in cookies
@@ -103,11 +105,11 @@
             fetchArrivalTimes('https://api.tfl.gov.uk/Line/210/Arrivals/490000030Q', 'arrival-times-210');
 
             // Restore visibility state from cookies
-            const toggleIds = ['302', '302-home', '210'];
+            const toggleIds = ['toggle-302', 'toggle-302-home', 'toggle-210'];
             toggleIds.forEach(id => {
                 const state = getCookie(id);
                 if (state === 'false') {
-                    toggleArrivalTimes(`arrival-times-${id}`, id);
+                    toggleArrivalTimes(`arrival-times-${id.split('-')[1]}`, id);
                 }
             });
         };
