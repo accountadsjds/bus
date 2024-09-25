@@ -14,12 +14,18 @@
         h1 {
             color: #333;
         }
-        .arrival-time {
-            margin: 10px 0;
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
             padding: 10px;
-            background: #fff;
             border: 1px solid #ddd;
-            border-radius: 5px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
         }
         .rss-feed {
             margin-top: 20px;
@@ -32,7 +38,17 @@
 </head>
 <body>
     <h1>Bus Arrival Times</h1>
-    <div id="arrival-times"></div>
+    <table id="arrival-times">
+        <thead>
+            <tr>
+                <th>Destination</th>
+                <th>Arrival Time (Minutes)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Arrival times will be populated here -->
+        </tbody>
+    </table>
     <div class="rss-feed" id="rss-feed" style="display: none;"></div>
 
     <script>
@@ -41,14 +57,16 @@
         async function fetchArrivalTimes() {
             const response = await fetch('https://api.tfl.gov.uk/Line/302/Arrivals/490000034N');
             arrivalData = await response.json();
-            const arrivalTimesDiv = document.getElementById('arrival-times');
+            const arrivalTimesTableBody = document.getElementById('arrival-times').querySelector('tbody');
 
             arrivalData.forEach(item => {
                 const timeToStationInMinutes = (item.timeToStation / 60).toFixed(2); // Convert seconds to minutes
-                const arrivalTimeElement = document.createElement('div');
-                arrivalTimeElement.className = 'arrival-time';
-                arrivalTimeElement.textContent = `Bus to ${item.destinationName} arrives in ${timeToStationInMinutes} minutes.`;
-                arrivalTimesDiv.appendChild(arrivalTimeElement);
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.destinationName}</td>
+                    <td>${timeToStationInMinutes}</td>
+                `;
+                arrivalTimesTableBody.appendChild(row);
             });
 
             // Automatically generate the RSS feed after fetching arrival times
