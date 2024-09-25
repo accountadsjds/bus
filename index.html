@@ -33,7 +33,6 @@
 <body>
     <h1>Bus Arrival Times</h1>
     <div id="arrival-times"></div>
-    <button id="generate-rss">Generate RSS Feed</button>
     <div class="rss-feed" id="rss-feed" style="display: none;"></div>
 
     <script>
@@ -51,6 +50,9 @@
                 arrivalTimeElement.textContent = `Bus to ${item.destinationName} arrives in ${timeToStationInMinutes} minutes.`;
                 arrivalTimesDiv.appendChild(arrivalTimeElement);
             });
+
+            // Automatically generate the RSS feed after fetching arrival times
+            generateRSSFeed();
         }
 
         function generateRSSFeed() {
@@ -85,9 +87,6 @@
 
         // Fetch arrival times when the page loads
         window.onload = fetchArrivalTimes;
-
-        // Add event listener to the button
-        document.getElementById('generate-rss').addEventListener('click', generateRSSFeed);
     </script>
 </body>
 </html>
