@@ -27,77 +27,21 @@
     <h1>302 from Station to MGS</h1>
     <div id="arrival-times-302-to"></div>
 
-    <script>
-        let arrivalData = [];
-
-        async function fetchArrivalTimes302to() {
-            const response = await fetch('https://api.tfl.gov.uk/Line/302/Arrivals/490000034N');
-            arrivalData = await response.json();
-
-            // Sort the arrival data by timeToStation in ascending order
-            arrivalData.sort((a, b) => a.timeToStation - b.timeToStation);
-
-            const arrivalTimesDiv = document.getElementById('arrival-times-302-to');
-
-            arrivalData.forEach(item => {
-                const timeToStationInMinutes = (item.timeToStation / 60).toFixed(2); // Convert seconds to minutes
-                const expectedArrivalTime = new Date(item.expectedArrival).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); // Format expected arrival time
-
-                const arrivalTimeElement = document.createElement('div');
-                arrivalTimeElement.className = 'arrival-time';
-                arrivalTimeElement.textContent = `302 to ${item.destinationName} arrives in ${timeToStationInMinutes} minutes (Expected Arrival: ${expectedArrivalTime}).`;
-                arrivalTimesDiv.appendChild(arrivalTimeElement);
-            });
-        }
-
-        // Fetch arrival times when the page loads
-        window.onload = fetchArrivalTimes302to;
-    </script>
-
     <h1>302 from MGS to Station</h1>
     <div id="arrival-times-302-home"></div>
 
-    <script>
-        let arrivalData = [];
-
-        async function fetchArrivalTimes302home() {
-            const response = await fetch('https://api.tfl.gov.uk/Line/302/Arrivals/490010442S');
-            arrivalData = await response.json();
-
-            // Sort the arrival data by timeToStation in ascending order
-            arrivalData.sort((a, b) => a.timeToStation - b.timeToStation);
-
-            const arrivalTimesDiv = document.getElementById('arrival-times-302-home');
-
-            arrivalData.forEach(item => {
-                const timeToStationInMinutes = (item.timeToStation / 60).toFixed(2); // Convert seconds to minutes
-                const expectedArrivalTime = new Date(item.expectedArrival).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); // Format expected arrival time
-
-                const arrivalTimeElement = document.createElement('div');
-                arrivalTimeElement.className = 'arrival-time';
-                arrivalTimeElement.textContent = `302 to ${item.destinationName} arrives in ${timeToStationInMinutes} minutes (Expected Arrival: ${expectedArrivalTime}).`;
-                arrivalTimesDiv.appendChild(arrivalTimeElement);
-            });
-        }
-
-        // Fetch arrival times when the page loads
-        window.onload = fetchArrivalTimes302home;
-    </script>
-
-        <h1>210 From outside Brent Cross</h1>
+    <h1>210 From outside Brent Cross</h1>
     <div id="arrival-times-210"></div>
 
     <script>
-        let arrivalData = [];
-
-        async function fetchArrivalTimes210() {
-            const response = await fetch('https://api.tfl.gov.uk/Line/210/Arrivals/490000030Q');
-            arrivalData = await response.json();
+        async function fetchArrivalTimes(url, elementId) {
+            const response = await fetch(url);
+            const arrivalData = await response.json();
 
             // Sort the arrival data by timeToStation in ascending order
             arrivalData.sort((a, b) => a.timeToStation - b.timeToStation);
 
-            const arrivalTimesDiv = document.getElementById('arrival-times-210');
+            const arrivalTimesDiv = document.getElementById(elementId);
 
             arrivalData.forEach(item => {
                 const timeToStationInMinutes = (item.timeToStation / 60).toFixed(2); // Convert seconds to minutes
@@ -105,13 +49,17 @@
 
                 const arrivalTimeElement = document.createElement('div');
                 arrivalTimeElement.className = 'arrival-time';
-                arrivalTimeElement.textContent = `302 to ${item.destinationName} arrives in ${timeToStationInMinutes} minutes (Expected Arrival: ${expectedArrivalTime}).`;
+                arrivalTimeElement.textContent = `${item.lineName} to ${item.destinationName} arrives in ${timeToStationInMinutes} minutes (Expected Arrival: ${expectedArrivalTime}).`;
                 arrivalTimesDiv.appendChild(arrivalTimeElement);
             });
         }
 
         // Fetch arrival times when the page loads
-        window.onload = fetchArrivalTimes210;
+        window.onload = function() {
+            fetchArrivalTimes('https://api.tfl.gov.uk/Line/302/Arrivals/490000034N', 'arrival-times-302-to');
+            fetchArrivalTimes('https://api.tfl.gov.uk/Line/302/Arrivals/490010442S', 'arrival-times-302-home');
+            fetchArrivalTimes('https://api.tfl.gov.uk/Line/210/Arrivals/490000030Q', 'arrival-times-210');
+        };
     </script>
 </body>
 </html>
