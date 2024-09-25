@@ -21,6 +21,14 @@
             border: 1px solid #ddd;
             border-radius: 5px;
         }
+        .no-updates {
+            margin: 10px 0;
+            padding: 10px;
+            background: #ffdddd;
+            border: 1px solid #dd0000;
+            border-radius: 5px;
+            color: #dd0000;
+        }
     </style>
 </head>
 <body>
@@ -35,23 +43,35 @@
 
     <script>
         async function fetchArrivalTimes(url, elementId) {
-            const response = await fetch(url);
-            const arrivalData = await response.json();
-
-            // Sort the arrival data by timeToStation in ascending order
-            arrivalData.sort((a, b) => a.timeToStation - b.timeToStation);
-
             const arrivalTimesDiv = document.getElementById(elementId);
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const arrivalData = await response.json();
 
-            arrivalData.forEach(item => {
-                const timeToStationInMinutes = (item.timeToStation / 60).toFixed(2); // Convert seconds to minutes
-                const expectedArrivalTime = new Date(item.expectedArrival).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); // Format expected arrival time
+                // Check if arrivalData is empty
+                if (arrivalData.length === 0) {
+                    arrivalTimesDiv.innerHTML = '<div class="no-updates">Live updates are not available for this location at the moment.</div>';
+                    return;
+                }
 
-                const arrivalTimeElement = document.createElement('div');
-                arrivalTimeElement.className = 'arrival-time';
-                arrivalTimeElement.textContent = `${item.lineName} to ${item.destinationName} arrives in ${timeToStationInMinutes} minutes (${expectedArrivalTime}).`;
-                arrivalTimesDiv.appendChild(arrivalTimeElement);
-            });
+                // Sort the arrival data by timeToStation in ascending order
+                arrivalData.sort((a, b) => a.timeToStation - b.timeToStation);
+
+                arrivalData.forEach(item => {
+                    const timeToStationInMinutes = (item.timeToStation / 60).toFixed(2); // Convert seconds to minutes
+                    const expectedArrivalTime = new Date(item.expectedArrival).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); // Format expected arrival time
+
+                    const arrivalTimeElement = document.createElement('div');
+                    arrivalTimeElement.className = 'arrival-time';
+                    arrivalTimeElement.textContent = `${item.lineName} to ${item.destinationName} arrives in ${timeToStationInMinutes} minutes (${expectedArrivalTime}).`;
+                    arrivalTimesDiv.appendChild(arrivalTimeElement);
+                });
+            } catch (error) {
+                arrivalTimesDiv.innerHTML = '<div class="no-updates">Live updates are not available for this location at the moment.</div>';
+            }
         }
 
         // Fetch arrival times when the page loads
