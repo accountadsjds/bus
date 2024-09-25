@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arrival Times</title>
+    <title>Bus Arrival Times</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -21,19 +21,30 @@
             border: 1px solid #ddd;
             border-radius: 5px;
         }
+        .rss-feed {
+            margin-top: 20px;
+            padding: 10px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
     <h1>Bus Arrival Times</h1>
     <div id="arrival-times"></div>
+    <button id="generate-rss">Generate RSS Feed</button>
+    <div class="rss-feed" id="rss-feed" style="display: none;"></div>
 
     <script>
+        let arrivalData = [];
+
         async function fetchArrivalTimes() {
             const response = await fetch('https://api.tfl.gov.uk/Line/302/Arrivals/490000034N');
-            const data = await response.json();
+            arrivalData = await response.json();
             const arrivalTimesDiv = document.getElementById('arrival-times');
 
-            data.forEach(item => {
+            arrivalData.forEach(item => {
                 const timeToStationInMinutes = (item.timeToStation / 60).toFixed(2); // Convert seconds to minutes
                 const arrivalTimeElement = document.createElement('div');
                 arrivalTimeElement.className = 'arrival-time';
@@ -42,8 +53,41 @@
             });
         }
 
+        function generateRSSFeed() {
+            const rssFeedDiv = document.getElementById('rss-feed');
+            let rssContent = `<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0">
+<channel>
+<title>Bus Arrival Times</title>
+<description>Upcoming bus arrival times from Burnt Oak Station</description>
+<link>http://example.com</link>
+<language>en-us</language>`;
+
+            arrivalData.forEach(item => {
+                const timeToStationInMinutes = (item.timeToStation / 60).toFixed(2);
+                const arrivalTime = new Date(item.expectedArrival).toUTCString();
+                rssContent += `
+<item>
+<title>Bus to ${item.destinationName}</title>
+<description>Arrives in ${timeToStationInMinutes} minutes.</description>
+<pubDate>${arrivalTime}</pubDate>
+<link>http://example.com/bus/${item.id}</link>
+</item>`;
+            });
+
+            rssContent += `
+</channel>
+</rss>`;
+
+            rssFeedDiv.textContent = rssContent;
+            rssFeedDiv.style.display = 'block';
+        }
+
         // Fetch arrival times when the page loads
         window.onload = fetchArrivalTimes;
+
+        // Add event listener to the button
+        document.getElementById('generate-rss').addEventListener('click', generateRSSFeed);
     </script>
 </body>
 </html>
