@@ -13,6 +13,7 @@
         }
         h1 {
             color: #333;
+            cursor: pointer; /* Make the header clickable */
         }
         .arrival-time {
             margin: 10px 0;
@@ -29,24 +30,17 @@
             border-radius: 5px;
             color: #dd0000;
         }
-        .tab {
-            margin-bottom: 10px;
-        }
-        .tab-content {
-            display: none; /* Initially hide all tab contents */
-        }
     </style>
 </head>
 <body>
-    <div class="tab">
-        <button onclick="toggleTab('302-to')">Toggle 302 from Station to MGS</button>
-        <button onclick="toggleTab('302-home')">Toggle 302 from MGS to Station</button>
-        <button onclick="toggleTab('210')">Toggle 210 from outside Brent Cross</button>
-    </div>
+    <h1 onclick="toggleArrivalTimes('arrival-times-302-to', '302')">302 from Station to MGS <span id="toggle-302">+</span></h1>
+    <div id="arrival-times-302-to" style="display: none;"></div>
 
-    <div id="arrival-times-302-to" class="tab-content"></div>
-    <div id="arrival-times-302-home" class="tab-content"></div>
-    <div id="arrival-times-210" class="tab-content"></div>
+    <h1 onclick="toggleArrivalTimes('arrival-times-302-home', '302-home')">302 from MGS to Station <span id="toggle-302-home">+</span></h1>
+    <div id="arrival-times-302-home" style="display: none;"></div>
+
+    <h1 onclick="toggleArrivalTimes('arrival-times-210', '210')">210 From outside Brent Cross <span id="toggle-210">+</span></h1>
+    <div id="arrival-times-210" style="display: none;"></div>
 
     <script>
         function setCookie(name, value, days) {
@@ -61,15 +55,16 @@
             }, '');
         }
 
-        function toggleTab(tabId) {
-            const tabContent = document.getElementById(`arrival-times-${tabId}`);
-            const isOpen = tabContent.style.display === 'block';
+        function toggleArrivalTimes(elementId, toggleId) {
+            const arrivalTimesDiv = document.getElementById(elementId);
+            const toggleSpan = document.getElementById(toggleId);
+            const isVisible = arrivalTimesDiv.style.display === 'block';
 
-            // Toggle display
-            tabContent.style.display = isOpen ? 'none' : 'block';
+            arrivalTimesDiv.style.display = isVisible ? 'none' : 'block';
+            toggleSpan.textContent = isVisible ? '+' : '-';
 
-            // Store state in cookies
-            setCookie(`tab-${tabId}`, isOpen ? 'closed' : 'open', 7);
+            // Store the state in cookies
+            setCookie(toggleId, !isVisible, 7); // Store for 7 days
         }
 
         async function fetchArrivalTimes(url, elementId) {
@@ -81,18 +76,16 @@
                 }
                 const arrivalData = await response.json();
 
-                // Check if arrivalData is empty
                 if (arrivalData.length === 0) {
                     arrivalTimesDiv.innerHTML = '<div class="no-updates">Live updates are not available for this location at the moment.</div>';
                     return;
                 }
 
-                // Sort the arrival data by timeToStation in ascending order
                 arrivalData.sort((a, b) => a.timeToStation - b.timeToStation);
 
                 arrivalData.forEach(item => {
-                    const timeToStationInMinutes = (item.timeToStation / 60).toFixed(2); // Convert seconds to minutes
-                    const expectedArrivalTime = new Date(item.expectedArrival).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); // Format expected arrival time
+                    const timeToStationInMinutes = (item.timeToStation / 60).toFixed(2);
+                    const expectedArrivalTime = new Date(item.expectedArrival).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
                     const arrivalTimeElement = document.createElement('div');
                     arrivalTimeElement.className = 'arrival-time';
@@ -104,17 +97,17 @@
             }
         }
 
-        // Fetch arrival times when the page loads
         window.onload = function() {
             fetchArrivalTimes('https://api.tfl.gov.uk/Line/302/Arrivals/490000034N', 'arrival-times-302-to');
             fetchArrivalTimes('https://api.tfl.gov.uk/Line/302/Arrivals/490010442S', 'arrival-times-302-home');
             fetchArrivalTimes('https://api.tfl.gov.uk/Line/210/Arrivals/490000030Q', 'arrival-times-210');
 
-            // Check cookie state and set tab visibility
-            ['302-to', '302-home', '210'].forEach(tabId => {
-                const tabState = getCookie(`tab-${tabId}`);
-                if (tabState === 'open') {
-                    document.getElementById(`arrival-times-${tabId}`).style.display = 'block';
+            // Restore visibility state from cookies
+            const toggleIds = ['302', '302-home', '210'];
+            toggleIds.forEach(id => {
+                const state = getCookie(id);
+                if (state === 'false') {
+                    toggleArrivalTimes(`arrival-times-${id}`, id);
                 }
             });
         };
