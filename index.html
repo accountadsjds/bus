@@ -49,7 +49,7 @@
 
                 const arrivalTimeElement = document.createElement('div');
                 arrivalTimeElement.className = 'arrival-time';
-                arrivalTimeElement.textContent = `${item.lineName} to ${item.destinationName} arrives in ${timeToStationInMinutes} minutes (Expected Arrival: ${expectedArrivalTime}).`;
+                arrivalTimeElement.textContent = `${item.lineName} to ${item.destinationName} arrives in ${timeToStationInMinutes} minutes (${expectedArrivalTime}).`;
                 arrivalTimesDiv.appendChild(arrivalTimeElement);
             });
         }
