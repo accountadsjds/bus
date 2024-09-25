@@ -29,19 +29,49 @@
             border-radius: 5px;
             color: #dd0000;
         }
+        .tab {
+            margin-bottom: 10px;
+        }
+        .tab-content {
+            display: none; /* Initially hide all tab contents */
+        }
     </style>
 </head>
 <body>
-    <h1>302 from Station to MGS</h1>
-    <div id="arrival-times-302-to"></div>
+    <div class="tab">
+        <button onclick="toggleTab('302-to')">Toggle 302 from Station to MGS</button>
+        <button onclick="toggleTab('302-home')">Toggle 302 from MGS to Station</button>
+        <button onclick="toggleTab('210')">Toggle 210 from outside Brent Cross</button>
+    </div>
 
-    <h1>302 from MGS to Station</h1>
-    <div id="arrival-times-302-home"></div>
-
-    <h1>210 From outside Brent Cross</h1>
-    <div id="arrival-times-210"></div>
+    <div id="arrival-times-302-to" class="tab-content"></div>
+    <div id="arrival-times-302-home" class="tab-content"></div>
+    <div id="arrival-times-210" class="tab-content"></div>
 
     <script>
+        function setCookie(name, value, days) {
+            const expires = new Date(Date.now() + days * 864e5).toUTCString();
+            document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires + '; path=/';
+        }
+
+        function getCookie(name) {
+            return document.cookie.split('; ').reduce((r, v) => {
+                const parts = v.split('=');
+                return parts[0] === name ? decodeURIComponent(parts[1]) : r;
+            }, '');
+        }
+
+        function toggleTab(tabId) {
+            const tabContent = document.getElementById(`arrival-times-${tabId}`);
+            const isOpen = tabContent.style.display === 'block';
+
+            // Toggle display
+            tabContent.style.display = isOpen ? 'none' : 'block';
+
+            // Store state in cookies
+            setCookie(`tab-${tabId}`, isOpen ? 'closed' : 'open', 7);
+        }
+
         async function fetchArrivalTimes(url, elementId) {
             const arrivalTimesDiv = document.getElementById(elementId);
             try {
@@ -79,6 +109,14 @@
             fetchArrivalTimes('https://api.tfl.gov.uk/Line/302/Arrivals/490000034N', 'arrival-times-302-to');
             fetchArrivalTimes('https://api.tfl.gov.uk/Line/302/Arrivals/490010442S', 'arrival-times-302-home');
             fetchArrivalTimes('https://api.tfl.gov.uk/Line/210/Arrivals/490000030Q', 'arrival-times-210');
+
+            // Check cookie state and set tab visibility
+            ['302-to', '302-home', '210'].forEach(tabId => {
+                const tabState = getCookie(`tab-${tabId}`);
+                if (tabState === 'open') {
+                    document.getElementById(`arrival-times-${tabId}`).style.display = 'block';
+                }
+            });
         };
     </script>
 </body>
